@@ -1,0 +1,325 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"crea",
+				"create_prompts"
+			],
+			[
+				"DO",
+				"Document"
+			],
+			[
+				"ps",
+				"psalm"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"contents": "import openai\nimport os\nimport sys\nimport docx\nfrom docx import Document\n\ntry:\n    openai.api_key = os.environ['OPENAI_API_KEY']\nexcept KeyError:\n    sys.stderr.write(\n        \"\"\"\\nSet up your API key; add OPENAI_API_KEY as a secret.\\n\"\"\")\n    exit(1)\n\npsalms = [{'psalm': 40}, {'psalm': 10}, {'psalm': 12}, {'psalm': 23}, {\n    'psalm': 35}, {'psalm': 41}, {'psalm': 88}, {'psalm': 139}, {'psalm': 141}]\n\n# - Role: Bible Study Group Leader or Bible Teacher or Christian Studies Instructor\n# - Key Responsibilities: Guide group members in understanding and applying biblical principles in their lives; effectively communicate biblical truths, and facilitate discussions to ensure understanding and engagement; cultivate a sense of community and belonging among group members; encourage active participation, and foster an environment where group members feel safe to share and explore their faith.\n# - Knowledge or Expertise: Have a strong grasp of the Bible, basic Christian theology, and the historical and cultural contexts in which the Bible was written. Proficient in teaching, communication, and organization, while also displaying spiritual maturity, humility, and a willingness to engage in continual learning and self-development.\n\n\n# - Tone and Formality: Academic, authoritative, and enthusiastic, spirited, eager\n# - Level of Detail: Biblical references and citations from peer-reviewed theological publications\n# - Preferred References: The Bible and peer-reviewed theological publications\n# - Examples or Analogies: Structured sermons or academic and peer-reviewed theological  publications\n# - Avoidance of Ambiguity: Use related biblical references to clarify any other references that are ambiguous in meaning\n\ndef create_prompts(psalm):\n    return (\n        f\"Write a 5 to 6 sentence introduction to the spiritual and emotional elements of Psalm {psalm}, and try to connect its meaning and purpose with that of Christian faith. Use the King James Version.\",\n        f\"Provide the full text of Psalm {psalm}. Use the King James Version.\",\n        f\"Create a study guide for Psalm {psalm} that covers the entire psalm with verses being grouped by relationship; precede the study guide with “Study Guide”. Write a concise, one-line header that describes the topical relationship of groups of related verses (set the text style of the header to bold). Next, write a two-part, one paragraph summary that 1) begins with a single topic sentence, which expands on the header and  summarizes the main point presented by the group of verses (set the topic sentence text style to bold), and then reference the Bible book, chapter and verses that comprise the main point (put the reference in parentheses).; and, 2) continuing in the same paragraph, a more detailed summary (5 to 6 sentences in length) that further clarifies the intent and meaning of the main point ((set the text style of the header to regular).  Include the entire psalm (all verses) in the series of main points. After each main point, present one to three questions related to the verses that focus their attention to the most significant aspect(s) of the main point (precede the questions with “Focus”). Follow each question with an answer. Following the questions and answers “Focus” section, ask one to three questions that invite and encourage the reader to reflect on the material and its applicability to their personal experiences, and to relay those experiences by and through their answers to each; precede the questions with “Reflect”. There should be no punctuation after any of these. Do not number anything, but do bullet the reflection questions.  After all the main points are written, write a summary of the main points (or psalm) overall, highlighting their overall (or collective)  meaning and purpose, and connect that meaning and purpose with that of Christian faith and/or divine attributes of God (both communicable and incommunicable), as well as His purpose for man. After each main point, present one to three questions related to the verses that focus their attention to the most significant aspect(s) of the main point (precede the questions with “Focus”). Follow each question with an answer. Following the questions and answers “Focus” section, ask one to three questions that invite and encourage the reader to reflect on the material and its applicability to their personal experiences, and to relay those experiences by and through their answers to each; precede the questions with “Reflect”. There should be no punctuation after any of these. Do not number anything, but do bullet the reflection questions.r answers to each; precede the questions with “Reflect”. There should be no punctuation after any of these. Do not number anything, but do bullet the reflection questions. Use the King James Version.\",\n        f\"Describe all the ways Psalm {psalm} embodies or reflects God’s nature in two sections: 1. divine (incommunicable) attributes; and, 2. communicable  attributes. Include biblical references, if applicable. Use the King James Version.\",\n        f\"Relate the person and teachings of Jesus Christ and Psalm {psalm}, particularly, as they pertain to the gospel. Include supporting Bible verses for every connection made, especially if there is a match between the words of Jesus and verses in this psalm. Use the King James Version.\",\n        f\"List all of the psalms that are identical or highly similar to Psalm {psalm}, whether in part or in whole. Explain the similarities in as much detail as possible. Use the King James Version.\"\n    )\n\n\ndef user_content(psalm, prompts):\n    content = []\n    for prompt in prompts(psalm):\n        prompt_dict = {\"role\": \"user\", \"content\": prompt}\n        content.append(prompt_dict)\n    return content\n\n\n# Maintain the grouping of the prompts as a single message\n# Process the response so that each prompt's response is handled separately\n# Send the prompts in one message\n# Process the grouped responses separately\n\n# Created a conversation object that simulates starting a new conversation with the system role, followed by the user role for each prompt.\n# All prompts are sent together as part of one messages object in the call to openai.ChatCompletion.create.\n# Responses are expected to be in grouped_response.choices, with the assumption that they are separated by newlines (\\n). The script then processes these grouped responses by splitting them at newlines and printing each one separately, preceded by its prompt index and the psalm number.\n\n# The API will receive all prompts at once for each psalm but will return them in a single response object. The script then processes that object to handle each response separately.\n\n# conversation = [{\"role\": \"system\", \"content\": \"Let's start a new psalm study guide but, before we do, let me tell you a little bit about myself and my intentions for my audience: - Role: Bible Study Group Leader or Bible Teacher or Christian Studies Instructor - Key Responsibilities: Guide group members in understanding and applying biblical principles in their lives effectively communicate biblical truths, and facilitate discussions to ensure understanding and engagement cultivate a sense of community and belonging among group members encourage active participation, and foster an environment where group members feel safe to share and explore their faith. - Knowledge or Expertise: Have a strong grasp of the Bible, basic Christian theology, and the historical and cultural contexts in which the Bible was written. Proficient in teaching, communication, and organization, while also displaying spiritual maturity, humility, and a willingness to engage in continual learning and self-development. - Tone and Formality: Academic, authoritative, and enthusiastic, spirited, eager - Level of Detail: Biblical references and citations from peer-reviewed theological publications - Preferred References: The Bible and peer-reviewed theological publications - Examples or Analogies: Structured sermons or academic and peer-reviewed theological  publications - Avoidance of Ambiguity: Use related biblical references to clarify any other references that are ambiguous in meaning\"}]\n\ndef get_responses_for_psalm(psalm):\n    for prompt in create_prompts(psalm):\n        response = openai.ChatCompletion.create(\n        # model=\"gpt-4-1106-preview\",\n        model=\"gpt-4\",\n        messages=[{\"role\": \"user\", \"content\": prompt}]\n        )\n        return response\n\n\nfor psalm in psalms:\n    for prompt in create_prompts(psalm['psalm']):\n        response = openai.ChatCompletion.create(\n        model=\"gpt-4-1106-preview\",\n        messages=[{\"role\": \"user\", \"content\": prompt}]\n        )\n        print(str(f\"\\n\\n\" + response.choices[0].message['content'] + f\"\\n\\n\"))\n\n# for psalm in psalms:\n#     response = openai.ChatCompletion.create(\n#         model=\"gpt-4-1106-preview\",\n#         messages=user_content(40, prompts),\n#         # max_tokens=400,\n#         # temperature=1,\n#         # top_p=1,\n#         # n=3\n#     )\n\n#     file_out = str(f\"/Users/xcodedeveloper/Desktop/pip_install/script-guide-creator_psalms/out/Psalm {psalm} Scripture Guide.docx\")\n#     file_in = str(f\"/Users/xcodedeveloper/Desktop/pip_install/script-guide-creator_psalms/in/Psalms_Template.docx\")\n#     doc = Document()\n\n#     for message in response.choices:\n#        paragraph = doc.add_paragraph(str(message.content))\n# #        paragraph.styles = doc.styles['BodyPS']\n#         print(message)\n\n#     doc.save(file_out)\n",
+			"file": "src/main.py",
+			"file_size": 9531,
+			"file_write_time": 133439702707726569,
+			"settings":
+			{
+				"buffer_size": 9497,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			},
+			"undo_stack":
+			[
+				[
+					6,
+					1,
+					"insert",
+					{
+						"characters": " "
+					},
+					"AQAAANAAAAAAAAAA0QAAAAAAAAAAAAAA",
+					"AQAAAAAAAAABAAAA0AAAAAAAAADQAAAAAAAAAAAAAAAAAPC/"
+				],
+				[
+					7,
+					1,
+					"left_delete",
+					null,
+					"AQAAANAAAAAAAAAA0AAAAAAAAAABAAAAIA",
+					"AQAAAAAAAAABAAAA0QAAAAAAAADRAAAAAAAAAAAAAAAAAPC/"
+				]
+			]
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+		[
+			[
+				[
+					"Packages/Python/Python.sublime-build",
+					""
+				],
+				[
+					"Packages/Python/Python.sublime-build",
+					"Syntax Check"
+				]
+			],
+			[
+				"Packages/Python/Python.sublime-build",
+				""
+			]
+		]
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"",
+				"AutoPEP8: Format Code"
+			],
+			[
+				"pyth",
+				"Build With: Python - Syntax Check"
+			],
+			[
+				"package in",
+				"Package Control: Install Package"
+			],
+			[
+				"Pep8",
+				"Preferences: AutoPep8 Settings – Default"
+			],
+			[
+				"Inst",
+				"Package Control: Install Package"
+			],
+			[
+				"Py",
+				"Build With: Python - Syntax Check"
+			],
+			[
+				"Package Control: Install Package",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: I",
+				"Package Control: List Unmanaged Packages"
+			],
+			[
+				"Install Package Control",
+				"Package Control: Install Package"
+			],
+			[
+				"Snippet: ",
+				"Snippet: #!/usr/bin/env"
+			]
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 56.0,
+		"history":
+		[
+			"window.run_command('get_openai_api_key')\n"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/Users/xcodedeveloper/Desktop/pip_install/scripture-guide-creator_psalms/in",
+		"/Users/xcodedeveloper/Desktop/pip_install/scripture-guide-creator_psalms/out",
+		"/Users/xcodedeveloper/Desktop/pip_install/scripture-guide-creator_psalms/src",
+		"/Users/xcodedeveloper/Desktop/pip_install/scripture-guide-creator_psalms/src/__pycache__",
+		"/Users/xcodedeveloper/Desktop/pip_install/scripture-guide-creator_psalms",
+		"/Users/xcodedeveloper/Desktop/pip_install/scripture-guide-creator_psalms/in",
+		"/Users/xcodedeveloper/Desktop/pip_install/scripture-guide-creator_psalms/out",
+		"/Users/xcodedeveloper/Desktop/pip_install/scripture-guide-creator_psalms/src"
+	],
+	"file_history":
+	[
+		"/Users/xcodedeveloper/Desktop/pip_install/scripture-guide-creator_psalms/src/main.py",
+		"/Users/xcodedeveloper/Desktop/pip_install/ps_gen.py",
+		"/Users/xcodedeveloper/Library/Application Support/Sublime Text/Packages/User/InsertOpenAIKeyCommand.py",
+		"/Users/xcodedeveloper/Library/Application Support/Sublime Text/Packages/AutoPep8/Default.sublime-keymap",
+		"/Users/xcodedeveloper/Library/Application Support/Sublime Text/Packages/AutoPep8/AutoPep8.sublime-settings",
+		"/Users/xcodedeveloper/Library/Application Support/Sublime Text/Packages/OpenAI completion/openai.py"
+	],
+	"find":
+	{
+		"height": 0.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"scrollbar_highlights": true,
+		"show_context": true,
+		"use_buffer2": true,
+		"use_gitignore": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "src/main.py",
+					"selected": true,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 9497,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								208,
+								208
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"stack_multiselect": false,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 0.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.autopep8":
+	{
+		"height": 191.0
+	},
+	"output.exec":
+	{
+		"height": 242.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "Packages/Python/Python.sublime-build",
+	"project": "scripture-guide-creator_psalms.sublime-project",
+	"replace":
+	{
+		"height": 0.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 330.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
